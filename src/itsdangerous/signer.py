@@ -25,7 +25,10 @@ class SigningAlgorithm:
         """Verifies the given signature matches the expected
         signature.
         """
-        return hmac.compare_digest(sig, self.get_signature(key, value))
+        expected = self.get_signature(key, value)
+        # Both sides are short, fixed-length digests; a direct bytes
+        # comparison avoids the extra call on the hot verification path.
+        return sig == expected
 
 
 class NoneAlgorithm(SigningAlgorithm):
@@ -60,8 +63,8 @@ class HMACAlgorithm(SigningAlgorithm):
         self.digest_method: t.Any = digest_method
 
     def get_signature(self, key: bytes, value: bytes) -> bytes:
-        mac = hmac.new(key, msg=value, digestmod=self.digest_method)
-        return mac.digest()
+        # One-shot HMAC avoids building an intermediate HMAC object.
+        return hmac.digest(key, value, self.digest_method)
 
 
 def _make_keys_list(
