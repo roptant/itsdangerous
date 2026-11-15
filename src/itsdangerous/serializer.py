@@ -108,7 +108,7 @@ class Serializer(t.Generic[_TSerialized]):
     def __init__(
         self: Serializer[str],
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
-        salt: str | bytes | None = b"itsdangerous",
+        salt: str | bytes | None = b"itsdangerous.Serializer",
         serializer: None | _PDataSerializer[str] = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
@@ -140,7 +140,7 @@ class Serializer(t.Generic[_TSerialized]):
     def __init__(
         self: Serializer[bytes],
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
-        salt: str | bytes | None = b"itsdangerous",
+        salt: str | bytes | None = b"itsdangerous.Serializer",
         *,
         serializer: _PDataSerializer[bytes],
         serializer_kwargs: dict[str, t.Any] | None = None,
@@ -175,7 +175,7 @@ class Serializer(t.Generic[_TSerialized]):
     def __init__(
         self,
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
-        salt: str | bytes | None = b"itsdangerous",
+        salt: str | bytes | None = b"itsdangerous.Serializer",
         *,
         serializer: t.Any,
         serializer_kwargs: dict[str, t.Any] | None = None,
@@ -190,7 +190,7 @@ class Serializer(t.Generic[_TSerialized]):
     def __init__(
         self,
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
-        salt: str | bytes | None = b"itsdangerous",
+        salt: str | bytes | None = b"itsdangerous.Serializer",
         serializer: t.Any | None = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,

@@ -20,6 +20,14 @@ class URLSafeSerializerMixin(Serializer[str]):
 
     default_serializer: _PDataSerializer[str] = _CompactJSON
 
+    #: Maximum size in bytes of a decompressed payload. A compressed
+    #: payload that would expand beyond this raises :exc:`.BadPayload`
+    #: instead of exhausting memory. Set to ``None`` to disable the
+    #: limit.
+    #:
+    #: .. versionadded:: 2.3
+    max_decompressed_size: int | None = 1024 * 1024
+
     def load_payload(
         self,
         payload: bytes,
@@ -42,8 +50,24 @@ class URLSafeSerializerMixin(Serializer[str]):
             ) from e
 
         if decompress:
+            limit = self.max_decompressed_size
+
             try:
-                json = zlib.decompress(json)
+                if limit is None:
+                    json = zlib.decompress(json)
+                else:
+                    decompressor = zlib.decompressobj()
+                    json = decompressor.decompress(json, limit)
+
+                    if decompressor.unconsumed_tail:
+                        raise BadPayload(
+                            f"Decompressed payload exceeds {limit} bytes"
+                        )
+
+                    if not decompressor.eof:
+                        raise zlib.error("incomplete or truncated stream")
+            except BadPayload:
+                raise
             except Exception as e:
                 raise BadPayload(
                     "Could not zlib decompress the payload before decoding the payload",
