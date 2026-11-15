@@ -98,6 +98,8 @@ Only the serializer with the same salt can load the data.
     42
 
 
+.. _key-rotation:
+
 Key Rotation
 ------------
 
@@ -132,6 +134,12 @@ a validation error.
 
     s = Serializer(SECRET_KEYS)
     s.loads(t)  # valid even though it was signed with a previous key
+
+Rotation and ``max_age`` work independently. A timed token signed with
+a key that is still in the list is accepted until it is older than
+``max_age`` (see :doc:`timed` for how the age is checked); once its key
+is removed from the list it is rejected with
+:exc:`~itsdangerous.exc.BadSignature` regardless of its age.
 
 
 Digest Method Security
