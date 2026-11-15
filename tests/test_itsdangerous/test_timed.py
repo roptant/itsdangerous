@@ -84,6 +84,39 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
 
         assert isinstance(exc_info.value.date_signed, datetime)
 
+    def test_future_within_skew(self, signer, ts, freeze):
+        signer.max_future_skew = 5
+        signed = signer.sign("value")
+        # The verifying clock is 3 seconds behind the signing clock.
+        freeze.move_to(ts - timedelta(seconds=3))
+        assert signer.unsign(signed, max_age=10) == b"value"
+
+    def test_future_beyond_skew(self, signer, ts, freeze):
+        signer.max_future_skew = 5
+        signed = signer.sign("value")
+        freeze.move_to(ts - timedelta(seconds=6))
+
+        with pytest.raises(SignatureExpired) as exc_info:
+            signer.unsign(signed, max_age=10)
+
+        assert "< 0 seconds" in str(exc_info.value)
+
+    def test_future_default_rejects(self, signer, ts, freeze):
+        signed = signer.sign("value")
+        freeze.move_to(ts - timedelta(seconds=1))
+
+        with pytest.raises(SignatureExpired):
+            signer.unsign(signed, max_age=10)
+
+    def test_negative_skew_treated_as_zero(self, signer, ts, freeze):
+        signer.max_future_skew = -30
+        signed = signer.sign("value")
+        assert signer.unsign(signed, max_age=10) == b"value"
+        freeze.move_to(ts - timedelta(seconds=1))
+
+        with pytest.raises(SignatureExpired):
+            signer.unsign(signed, max_age=10)
+
     def test_sig_error_date_signed(self, signer):
         signed = signer.sign("my string").replace(b"my", b"other", 1)
 
