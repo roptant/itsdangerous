@@ -41,8 +41,8 @@ A few consequences are worth knowing:
     ``max_age`` is given.
 -   ``max_age`` limits how long a token is accepted. It is not
     revocation: a token that has not expired yet stays valid until it
-    does. Rotate the secret key (see :ref:`key-rotation`) to invalidate
-    every outstanding token.
+    does. To invalidate every token signed with a key, remove that key
+    from the list of secret keys (see :ref:`key-rotation`).
 
 .. autoclass:: TimestampSigner
     :members:

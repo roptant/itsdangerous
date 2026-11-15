@@ -137,7 +137,8 @@ a validation error.
 
 Rotation and ``max_age`` work independently. A timed token signed with
 a key that is still in the list is accepted until it is older than
-``max_age``; once its key is removed from the list it is rejected with
+``max_age`` (see :doc:`timed` for how the age is checked); once its key
+is removed from the list it is rejected with
 :exc:`~itsdangerous.exc.BadSignature` regardless of its age.
 
 
