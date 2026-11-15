@@ -21,6 +21,20 @@ than a given age.
       ...
     itsdangerous.exc.SignatureExpired: Signature age 15 > 5 seconds
 
+Tolerating clock skew
+---------------------
+
+When the machine that verifies runs slightly behind the machine that
+signs, a fresh token can look like it comes from the future and is
+rejected. Set :attr:`TimestampSigner.max_future_skew` to a small number
+of seconds to accept such tokens. The default ``0`` keeps the strict
+behavior.
+
+.. code-block:: python
+
+    class SkewTolerantSigner(TimestampSigner):
+        max_future_skew = 5
+
 .. autoclass:: TimestampSigner
     :members:
 
