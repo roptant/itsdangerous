@@ -22,3 +22,28 @@ class TestURLSafeTimedSerializer(TestURLSafeSerializer, TestTimedSerializer):
     @pytest.fixture()
     def serializer_factory(self):
         return partial(URLSafeTimedSerializer, secret_key="secret-key")
+
+
+def test_decompressed_size_limit():
+    from itsdangerous.exc import BadPayload
+    from itsdangerous.url_safe import URLSafeSerializer
+
+    serializer = URLSafeSerializer("secret-key")
+    signed = serializer.dumps("a" * 5000)
+    assert serializer.loads(signed) == "a" * 5000
+
+    serializer.max_decompressed_size = 100
+
+    with pytest.raises(BadPayload) as exc_info:
+        serializer.loads(signed)
+
+    assert "exceeds 100 bytes" in str(exc_info.value)
+
+
+def test_decompressed_size_limit_disabled():
+    from itsdangerous.url_safe import URLSafeSerializer
+
+    serializer = URLSafeSerializer("secret-key")
+    serializer.max_decompressed_size = None
+    signed = serializer.dumps("b" * 5000)
+    assert serializer.loads(signed) == "b" * 5000
