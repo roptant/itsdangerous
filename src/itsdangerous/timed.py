@@ -26,6 +26,16 @@ class TimestampSigner(Signer):
     unsigning failed because the signature is expired.
     """
 
+    #: How many seconds a signature's timestamp may lie in the future
+    #: before :meth:`unsign` rejects it when ``max_age`` is given. The
+    #: default ``0`` rejects any future timestamp, as before. Set a small
+    #: positive value to tolerate clock differences between the machine
+    #: that signs and the machine that verifies. Negative values are
+    #: treated as ``0``.
+    #:
+    #: .. versionadded:: 2.3
+    max_future_skew: int = 0
+
     def get_timestamp(self) -> int:
         """Returns the current timestamp. The function must return an
         integer.
@@ -145,7 +155,7 @@ class TimestampSigner(Signer):
                     date_signed=self.timestamp_to_datetime(ts_int),
                 )
 
-            if age < 0:
+            if age < -max(0, int(self.max_future_skew)):
                 raise SignatureExpired(
                     f"Signature age {age} < 0 seconds",
                     payload=value,
